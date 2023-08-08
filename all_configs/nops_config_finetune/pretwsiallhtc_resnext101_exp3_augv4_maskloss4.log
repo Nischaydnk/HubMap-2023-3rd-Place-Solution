@@ -1,0 +1,1046 @@
+2023-07-24 11:01:14,385 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.8.10 (default, May 26 2023, 14:05:08) [GCC 9.4.0]
+CUDA available: True
+GPU 0,1,2: NVIDIA RTX A6000
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 11.7, V11.7.99
+GCC: x86_64-linux-gnu-gcc (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0
+PyTorch: 1.13.1+cu117
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.14.1+cu117
+OpenCV: 4.7.0
+MMCV: 1.7.1
+MMCV Compiler: GCC 9.4
+MMCV CUDA Compiler: 11.7
+MMDetection: 2.25.3+1317ff9
+------------------------------------------------------------
+
+2023-07-24 11:01:16,119 - mmdet - INFO - Distributed training: True
+2023-07-24 11:01:17,606 - mmdet - INFO - Config:
+model = dict(
+    type='HybridTaskCascade',
+    backbone=dict(
+        type='DetectoRS_ResNeXt',
+        depth=101,
+        num_stages=4,
+        groups=32,
+        base_width=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        norm_eval=True,
+        style='pytorch',
+        conv_cfg=dict(type='ConvAWS'),
+        sac=dict(type='SAC', use_deform=True),
+        stage_with_sac=(False, True, True, True),
+        output_img=True),
+    neck=dict(
+        type='RFP',
+        rfp_steps=2,
+        aspp_out_channels=64,
+        aspp_dilations=(1, 3, 6, 1),
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=5,
+        rfp_backbone=dict(
+            rfp_inplanes=256,
+            type='DetectoRS_ResNeXt',
+            depth=101,
+            groups=32,
+            base_width=4,
+            num_stages=4,
+            out_indices=(0, 1, 2, 3),
+            frozen_stages=1,
+            norm_cfg=dict(type='BN', requires_grad=True),
+            norm_eval=True,
+            conv_cfg=dict(type='ConvAWS'),
+            sac=dict(type='SAC', use_deform=True),
+            stage_with_sac=(False, True, True, True),
+            style='pytorch')),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(
+            type='SmoothL1Loss', beta=0.1111111111111111, loss_weight=1.0)),
+    roi_head=dict(
+        type='HybridTaskCascadeRoIHead',
+        interleaved=True,
+        mask_info_flow=True,
+        num_stages=3,
+        stage_loss_weights=[1, 0.5, 0.25],
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=[
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=1,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.1, 0.1, 0.2, 0.2]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1, loss_weight=1.0)),
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=1,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.05, 0.05, 0.1, 0.1]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1, loss_weight=1.0)),
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=1,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.033, 0.033, 0.067, 0.067]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1, loss_weight=1.0))
+        ],
+        mask_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        mask_head=[
+            dict(
+                type='HTCMaskHead',
+                with_conv_res=False,
+                num_convs=4,
+                in_channels=256,
+                conv_out_channels=256,
+                num_classes=1,
+                loss_mask=dict(
+                    type='CrossEntropyLoss', use_mask=True, loss_weight=2.0)),
+            dict(
+                type='HTCMaskHead',
+                num_convs=4,
+                in_channels=256,
+                conv_out_channels=256,
+                num_classes=1,
+                loss_mask=dict(
+                    type='CrossEntropyLoss', use_mask=True, loss_weight=2.0)),
+            dict(
+                type='HTCMaskHead',
+                num_convs=4,
+                in_channels=256,
+                conv_out_channels=256,
+                num_classes=1,
+                loss_mask=dict(
+                    type='CrossEntropyLoss', use_mask=True, loss_weight=2.0))
+        ]),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=0,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=[
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.5,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0.5,
+                    ignore_iof_thr=-1),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                mask_size=28,
+                pos_weight=-1,
+                debug=False),
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.6,
+                    neg_iou_thr=0.6,
+                    min_pos_iou=0.6,
+                    ignore_iof_thr=-1),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                mask_size=28,
+                pos_weight=-1,
+                debug=False),
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.7,
+                    neg_iou_thr=0.7,
+                    min_pos_iou=0.7,
+                    ignore_iof_thr=-1),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                mask_size=28,
+                pos_weight=-1,
+                debug=False)
+        ]),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.001,
+            nms=dict(type='nms', iou_threshold=0.5),
+            max_per_img=100,
+            mask_thr_binary=0.5)))
+data_root = ''
+metainfo = dict(classes=('blood_vessel', ), palette=[(220, 20, 60)])
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+albu_train_transforms = [
+    dict(
+        type='ShiftScaleRotate',
+        shift_limit=0.0625,
+        scale_limit=0.15,
+        rotate_limit=15,
+        p=0.4),
+    dict(type='RandomRotate90', p=0.4)
+]
+img_size = 2048
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+    dict(type='Resize', img_scale=[(2048, 2048)], keep_ratio=True),
+    dict(
+        type='RandomFlip',
+        direction=['horizontal', 'vertical'],
+        flip_ratio=0.5),
+    dict(
+        type='AutoAugment',
+        policies=[[{
+            'type': 'Shear',
+            'prob': 0.4,
+            'level': 0
+        }], [{
+            'type': 'Translate',
+            'prob': 0.4,
+            'level': 5
+        }],
+                  [{
+                      'type': 'PhotoMetricDistortion',
+                      'brightness_delta': 32,
+                      'contrast_range': (0.5, 1.5),
+                      'hue_delta': 18
+                  }],
+                  [{
+                      'type': 'MinIoURandomCrop',
+                      'min_ious': (0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                      'min_crop_size': 0.3
+                  }],
+                  [{
+                      'type':
+                      'CutOut',
+                      'n_holes': (5, 10),
+                      'cutout_shape': [(4, 4), (4, 8), (8, 4), (8, 8),
+                                       (16, 32), (32, 16), (32, 32), (32, 48),
+                                       (48, 32), (48, 48)]
+                  }],
+                  [{
+                      'type': 'BrightnessTransform',
+                      'prob': 0.6,
+                      'level': 4
+                  }, {
+                      'type': 'ContrastTransform',
+                      'prob': 0.6,
+                      'level': 6
+                  }, {
+                      'type': 'Rotate',
+                      'prob': 0.6,
+                      'level': 10
+                  }],
+                  [{
+                      'type': 'ColorTransform',
+                      'prob': 1.0,
+                      'level': 6
+                  }, {
+                      'type': 'EqualizeTransform'
+                  }]]),
+    dict(
+        type='Albu',
+        transforms=[
+            dict(
+                type='ShiftScaleRotate',
+                shift_limit=0.0625,
+                scale_limit=0.15,
+                rotate_limit=15,
+                p=0.4),
+            dict(type='RandomRotate90', p=0.4)
+        ],
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            min_visibility=0.0,
+            filter_lost_elements=True),
+        keymap=dict(img='image', gt_bboxes='bboxes', gt_masks='masks'),
+        update_pad_shape=False,
+        skip_img_without_anno=True),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=[(2048, 2048)],
+        flip=True,
+        flip_direction=['horizontal', 'vertical'],
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=6,
+    pin_memory=True,
+    drop_last=False,
+    train=dict(
+        type='CocoDataset',
+        classes=('blood_vessels', ),
+        ann_file='/home/nischay/hubmap/coco/ds1_coco_1024_train_all_fold1.json',
+        img_prefix='/home/nischay/hubmap/Data/train/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
+            dict(type='Resize', img_scale=[(2048, 2048)], keep_ratio=True),
+            dict(
+                type='RandomFlip',
+                direction=['horizontal', 'vertical'],
+                flip_ratio=0.5),
+            dict(
+                type='AutoAugment',
+                policies=[[{
+                    'type': 'Shear',
+                    'prob': 0.4,
+                    'level': 0
+                }], [{
+                    'type': 'Translate',
+                    'prob': 0.4,
+                    'level': 5
+                }],
+                          [{
+                              'type': 'PhotoMetricDistortion',
+                              'brightness_delta': 32,
+                              'contrast_range': (0.5, 1.5),
+                              'hue_delta': 18
+                          }],
+                          [{
+                              'type': 'MinIoURandomCrop',
+                              'min_ious': (0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                              'min_crop_size': 0.3
+                          }],
+                          [{
+                              'type':
+                              'CutOut',
+                              'n_holes': (5, 10),
+                              'cutout_shape': [(4, 4), (4, 8), (8, 4), (8, 8),
+                                               (16, 32), (32, 16), (32, 32),
+                                               (32, 48), (48, 32), (48, 48)]
+                          }],
+                          [{
+                              'type': 'BrightnessTransform',
+                              'prob': 0.5,
+                              'level': 4
+                          }, {
+                              'type': 'ContrastTransform',
+                              'prob': 0.5,
+                              'level': 6
+                          }, {
+                              'type': 'Rotate',
+                              'prob': 0.6,
+                              'level': 10
+                          }],
+                          [{
+                              'type': 'ColorTransform',
+                              'prob': 1.0,
+                              'level': 6
+                          }, {
+                              'type': 'EqualizeTransform'
+                          }]]),
+            dict(
+                type='Albu',
+                transforms=[
+                    dict(
+                        type='ShiftScaleRotate',
+                        shift_limit=0.0625,
+                        scale_limit=0.15,
+                        rotate_limit=15,
+                        p=0.4),
+                    dict(type='RandomRotate90', p=0.4)
+                ],
+                bbox_params=dict(
+                    type='BboxParams',
+                    format='pascal_voc',
+                    label_fields=['gt_labels'],
+                    min_visibility=0.0,
+                    filter_lost_elements=True),
+                keymap=dict(img='image', gt_bboxes='bboxes', gt_masks='masks'),
+                update_pad_shape=False,
+                skip_img_without_anno=True),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(
+                type='Collect',
+                keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'])
+        ]),
+    val=dict(
+        type='CocoDataset',
+        classes=('blood_vessels', ),
+        ann_file='/home/nischay/hubmap/coco/ds1_coco_1024_valid_all_fold1.json',
+        img_prefix='/home/nischay/hubmap/Data/train/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=[(2048, 2048)],
+                flip=True,
+                flip_direction=['horizontal', 'vertical'],
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CocoDataset',
+        classes=('blood_vessels', ),
+        ann_file=
+        '/home/nischay/hubmap/coco/ds12_coco_1024_valid_all_fold1.json',
+        img_prefix='/home/nischay/hubmap/Data/train/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=[(2048, 2048)],
+                flip=True,
+                flip_direction=['horizontal', 'vertical'],
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+lr_config = dict(
+    policy='CosineAnnealing',
+    by_epoch=False,
+    warmup='linear',
+    warmup_iters=200,
+    warmup_ratio=0.001,
+    min_lr=1e-08)
+evaluation = dict(interval=1, metric=['segm'], save_best='segm_mAP')
+runner = dict(type='EpochBasedRunner', max_epochs=21)
+checkpoint_config = dict(interval=-1, filename_tmpl='detectors_epoch_{}.pth')
+log_config = dict(interval=20, hooks=[dict(type='TextLoggerHook')])
+fp16 = dict(loss_scale=dict(init_scale=512))
+gpu_ids = range(0, 3)
+seed = 69
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = '/home/nischay/hubmap/try_mm/mmdetection/cbnet/work_dirs/hubmap/htc_resnext101_exp1pret_wsiall/best_segm_mAP_epoch_8.pth'
+work_dir = './work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4'
+workflow = [('train', 1)]
+auto_resume = False
+resume_from = None
+launcher = 'none'
+device = 'cuda'
+
+2023-07-24 11:01:17,607 - mmdet - INFO - Set random seed to 69, deterministic: False
+2023-07-24 11:01:22,155 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-07-24 11:01:22,167 - mmdet - INFO - load checkpoint from local path: /home/nischay/hubmap/try_mm/mmdetection/cbnet/work_dirs/hubmap/htc_resnext101_exp1pret_wsiall/best_segm_mAP_epoch_8.pth
+2023-07-24 11:01:23,059 - mmdet - INFO - Start running, host: root@mr-0xm20, work_dir: /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4
+2023-07-24 11:01:23,060 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(ABOVE_NORMAL) Fp16OptimizerHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) Fp16OptimizerHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) DistEvalHook                       
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2023-07-24 11:01:23,060 - mmdet - INFO - workflow: [('train', 1)], max: 21 epochs
+2023-07-24 11:01:23,063 - mmdet - INFO - Checkpoints will be saved to /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4 by HardDiskBackend.
+2023-07-24 11:03:44,035 - mmdet - INFO - Epoch [1][20/56]	lr: 9.584e-04, eta: 2:15:46, time: 7.047, data_time: 1.230, memory: 43716, loss_rpn_cls: 0.0340, loss_rpn_bbox: 0.0369, s0.loss_cls: 0.2129, s0.acc: 91.3135, s0.loss_bbox: 0.1631, s0.loss_mask: 0.5918, s1.loss_cls: 0.1083, s1.acc: 90.9503, s1.loss_bbox: 0.1712, s1.loss_mask: 0.2786, s2.loss_cls: 0.0527, s2.acc: 90.8742, s2.loss_bbox: 0.0832, s2.loss_mask: 0.1308, loss: 1.8635, grad_norm: 3.8497
+2023-07-24 11:05:29,698 - mmdet - INFO - Epoch [1][40/56]	lr: 1.953e-03, eta: 1:56:44, time: 5.284, data_time: 0.136, memory: 43731, loss_rpn_cls: 0.0255, loss_rpn_bbox: 0.0308, s0.loss_cls: 0.1822, s0.acc: 92.6367, s0.loss_bbox: 0.1413, s0.loss_mask: 0.5205, s1.loss_cls: 0.0923, s1.acc: 92.2780, s1.loss_bbox: 0.1627, s1.loss_mask: 0.2508, s2.loss_cls: 0.0457, s2.acc: 91.7445, s2.loss_bbox: 0.0887, s2.loss_mask: 0.1169, loss: 1.6572, grad_norm: 3.1815
+2023-07-24 11:07:57,254 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:07:58,236 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.364
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.714
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.297
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.302
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.441
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.540
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.538
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.538
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.538
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.477
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.613
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.659
+
+2023-07-24 11:08:00,280 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_1.pth.
+2023-07-24 11:08:00,281 - mmdet - INFO - Best segm_mAP is 0.3643 at 1 epoch.
+2023-07-24 11:08:00,281 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:08:00,281 - mmdet - INFO - Epoch(val) [1][29]	segm_mAP: 0.3643, segm_mAP_50: 0.7144, segm_mAP_75: 0.2975, segm_mAP_s: 0.3019, segm_mAP_m: 0.4411, segm_mAP_l: 0.5398, segm_mAP_copypaste: 0.3643 0.7144 0.2975 0.3019 0.4411 0.5398
+2023-07-24 11:10:09,527 - mmdet - INFO - Epoch [2][20/56]	lr: 3.719e-03, eta: 1:30:39, time: 6.461, data_time: 1.236, memory: 43745, loss_rpn_cls: 0.0205, loss_rpn_bbox: 0.0272, s0.loss_cls: 0.1744, s0.acc: 93.0029, s0.loss_bbox: 0.1296, s0.loss_mask: 0.5228, s1.loss_cls: 0.0863, s1.acc: 92.9768, s1.loss_bbox: 0.1594, s1.loss_mask: 0.2519, s2.loss_cls: 0.0438, s2.acc: 92.3129, s2.loss_bbox: 0.0929, s2.loss_mask: 0.1205, loss: 1.6293, grad_norm: 2.9895
+2023-07-24 11:11:56,751 - mmdet - INFO - Epoch [2][40/56]	lr: 4.679e-03, eta: 1:30:34, time: 5.362, data_time: 0.090, memory: 43745, loss_rpn_cls: 0.0214, loss_rpn_bbox: 0.0246, s0.loss_cls: 0.1774, s0.acc: 92.4675, s0.loss_bbox: 0.1373, s0.loss_mask: 0.5142, s1.loss_cls: 0.0902, s1.acc: 92.2278, s1.loss_bbox: 0.1567, s1.loss_mask: 0.2470, s2.loss_cls: 0.0451, s2.acc: 92.2101, s2.loss_bbox: 0.0891, s2.loss_mask: 0.1168, loss: 1.6197, grad_norm: 3.6092
+2023-07-24 11:14:24,660 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:14:25,757 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.376
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.716
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.331
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.308
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.461
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.571
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.481
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.630
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.753
+
+2023-07-24 11:14:25,881 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_1.pth was removed
+2023-07-24 11:14:27,749 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_2.pth.
+2023-07-24 11:14:27,749 - mmdet - INFO - Best segm_mAP is 0.3758 at 2 epoch.
+2023-07-24 11:14:27,749 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:14:27,749 - mmdet - INFO - Epoch(val) [2][29]	segm_mAP: 0.3758, segm_mAP_50: 0.7159, segm_mAP_75: 0.3309, segm_mAP_s: 0.3083, segm_mAP_m: 0.4606, segm_mAP_l: 0.5711, segm_mAP_copypaste: 0.3758 0.7159 0.3309 0.3083 0.4606 0.5711
+2023-07-24 11:16:34,984 - mmdet - INFO - Epoch [3][20/56]	lr: 6.355e-03, eta: 1:20:26, time: 6.361, data_time: 1.198, memory: 43745, loss_rpn_cls: 0.0199, loss_rpn_bbox: 0.0237, s0.loss_cls: 0.1566, s0.acc: 93.8249, s0.loss_bbox: 0.1184, s0.loss_mask: 0.4967, s1.loss_cls: 0.0802, s1.acc: 93.5695, s1.loss_bbox: 0.1506, s1.loss_mask: 0.2418, s2.loss_cls: 0.0413, s2.acc: 92.9915, s2.loss_bbox: 0.0871, s2.loss_mask: 0.1157, loss: 1.5318, grad_norm: 3.1682
+2023-07-24 11:18:21,560 - mmdet - INFO - Epoch [3][40/56]	lr: 7.249e-03, eta: 1:20:29, time: 5.329, data_time: 0.094, memory: 43745, loss_rpn_cls: 0.0191, loss_rpn_bbox: 0.0281, s0.loss_cls: 0.1784, s0.acc: 92.5326, s0.loss_bbox: 0.1398, s0.loss_mask: 0.5115, s1.loss_cls: 0.0918, s1.acc: 91.9933, s1.loss_bbox: 0.1669, s1.loss_mask: 0.2483, s2.loss_cls: 0.0466, s2.acc: 91.5965, s2.loss_bbox: 0.0927, s2.loss_mask: 0.1171, loss: 1.6402, grad_norm: 3.0842
+2023-07-24 11:20:49,351 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:20:50,320 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.394
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.738
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.350
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.316
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.483
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.602
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.494
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.643
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.688
+
+2023-07-24 11:20:50,443 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_2.pth was removed
+2023-07-24 11:20:52,327 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_3.pth.
+2023-07-24 11:20:52,328 - mmdet - INFO - Best segm_mAP is 0.3936 at 3 epoch.
+2023-07-24 11:20:52,328 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:20:52,328 - mmdet - INFO - Epoch(val) [3][29]	segm_mAP: 0.3936, segm_mAP_50: 0.7380, segm_mAP_75: 0.3503, segm_mAP_s: 0.3162, segm_mAP_m: 0.4834, segm_mAP_l: 0.6024, segm_mAP_copypaste: 0.3936 0.7380 0.3503 0.3162 0.4834 0.6024
+2023-07-24 11:22:59,513 - mmdet - INFO - Epoch [4][20/56]	lr: 8.779e-03, eta: 1:13:55, time: 6.357, data_time: 1.216, memory: 43755, loss_rpn_cls: 0.0189, loss_rpn_bbox: 0.0230, s0.loss_cls: 0.1542, s0.acc: 93.6442, s0.loss_bbox: 0.1143, s0.loss_mask: 0.4576, s1.loss_cls: 0.0793, s1.acc: 93.3856, s1.loss_bbox: 0.1455, s1.loss_mask: 0.2203, s2.loss_cls: 0.0412, s2.acc: 92.7370, s2.loss_bbox: 0.0908, s2.loss_mask: 0.1058, loss: 1.4510, grad_norm: 3.0924
+2023-07-24 11:24:46,153 - mmdet - INFO - Epoch [4][40/56]	lr: 9.255e-03, eta: 1:13:44, time: 5.332, data_time: 0.087, memory: 43755, loss_rpn_cls: 0.0149, loss_rpn_bbox: 0.0252, s0.loss_cls: 0.1667, s0.acc: 93.0713, s0.loss_bbox: 0.1291, s0.loss_mask: 0.4867, s1.loss_cls: 0.0858, s1.acc: 92.9213, s1.loss_bbox: 0.1598, s1.loss_mask: 0.2370, s2.loss_cls: 0.0451, s2.acc: 92.0770, s2.loss_bbox: 0.0946, s2.loss_mask: 0.1120, loss: 1.5570, grad_norm: 3.1078
+2023-07-24 11:27:14,309 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:27:15,260 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.375
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.706
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.346
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.299
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.462
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.624
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.553
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.553
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.553
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.490
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.630
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.676
+
+2023-07-24 11:27:15,268 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:27:15,268 - mmdet - INFO - Epoch(val) [4][29]	segm_mAP: 0.3748, segm_mAP_50: 0.7058, segm_mAP_75: 0.3462, segm_mAP_s: 0.2991, segm_mAP_m: 0.4623, segm_mAP_l: 0.6235, segm_mAP_copypaste: 0.3748 0.7058 0.3462 0.2991 0.4623 0.6235
+2023-07-24 11:29:23,350 - mmdet - INFO - Epoch [5][20/56]	lr: 8.983e-03, eta: 1:08:40, time: 6.403, data_time: 1.196, memory: 43755, loss_rpn_cls: 0.0149, loss_rpn_bbox: 0.0228, s0.loss_cls: 0.1472, s0.acc: 94.0820, s0.loss_bbox: 0.1156, s0.loss_mask: 0.4723, s1.loss_cls: 0.0739, s1.acc: 93.9529, s1.loss_bbox: 0.1503, s1.loss_mask: 0.2299, s2.loss_cls: 0.0390, s2.acc: 93.0209, s2.loss_bbox: 0.0890, s2.loss_mask: 0.1110, loss: 1.4657, grad_norm: 3.4577
+2023-07-24 11:31:10,029 - mmdet - INFO - Epoch [5][40/56]	lr: 8.816e-03, eta: 1:08:15, time: 5.333, data_time: 0.082, memory: 43755, loss_rpn_cls: 0.0193, loss_rpn_bbox: 0.0241, s0.loss_cls: 0.1628, s0.acc: 93.2178, s0.loss_bbox: 0.1256, s0.loss_mask: 0.4869, s1.loss_cls: 0.0844, s1.acc: 92.9448, s1.loss_bbox: 0.1527, s1.loss_mask: 0.2361, s2.loss_cls: 0.0429, s2.acc: 92.4427, s2.loss_bbox: 0.0894, s2.loss_mask: 0.1126, loss: 1.5368, grad_norm: 2.9823
+2023-07-24 11:33:37,934 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:33:39,017 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.386
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.722
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.361
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.319
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.471
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.609
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.559
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.559
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.559
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.494
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.637
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 11:33:39,025 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:33:39,025 - mmdet - INFO - Epoch(val) [5][29]	segm_mAP: 0.3859, segm_mAP_50: 0.7221, segm_mAP_75: 0.3611, segm_mAP_s: 0.3188, segm_mAP_m: 0.4708, segm_mAP_l: 0.6089, segm_mAP_copypaste: 0.3859 0.7221 0.3611 0.3188 0.4708 0.6089
+2023-07-24 11:35:47,973 - mmdet - INFO - Epoch [6][20/56]	lr: 8.488e-03, eta: 1:03:57, time: 6.447, data_time: 1.220, memory: 43755, loss_rpn_cls: 0.0163, loss_rpn_bbox: 0.0244, s0.loss_cls: 0.1554, s0.acc: 93.5466, s0.loss_bbox: 0.1228, s0.loss_mask: 0.4835, s1.loss_cls: 0.0774, s1.acc: 93.6182, s1.loss_bbox: 0.1524, s1.loss_mask: 0.2373, s2.loss_cls: 0.0402, s2.acc: 92.7757, s2.loss_bbox: 0.0922, s2.loss_mask: 0.1156, loss: 1.5176, grad_norm: 3.0282
+2023-07-24 11:37:35,775 - mmdet - INFO - Epoch [6][40/56]	lr: 8.292e-03, eta: 1:03:24, time: 5.390, data_time: 0.112, memory: 43755, loss_rpn_cls: 0.0158, loss_rpn_bbox: 0.0241, s0.loss_cls: 0.1698, s0.acc: 93.0534, s0.loss_bbox: 0.1338, s0.loss_mask: 0.4729, s1.loss_cls: 0.0859, s1.acc: 92.7416, s1.loss_bbox: 0.1657, s1.loss_mask: 0.2304, s2.loss_cls: 0.0450, s2.acc: 91.9770, s2.loss_bbox: 0.0966, s2.loss_mask: 0.1090, loss: 1.5489, grad_norm: 3.0634
+2023-07-24 11:40:03,217 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:40:04,305 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.394
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.731
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.353
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.325
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.477
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.625
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.502
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.643
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.718
+
+2023-07-24 11:40:04,429 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_3.pth was removed
+2023-07-24 11:40:06,303 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_6.pth.
+2023-07-24 11:40:06,303 - mmdet - INFO - Best segm_mAP is 0.3942 at 6 epoch.
+2023-07-24 11:40:06,304 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:40:06,304 - mmdet - INFO - Epoch(val) [6][29]	segm_mAP: 0.3942, segm_mAP_50: 0.7306, segm_mAP_75: 0.3532, segm_mAP_s: 0.3246, segm_mAP_m: 0.4768, segm_mAP_l: 0.6253, segm_mAP_copypaste: 0.3942 0.7306 0.3532 0.3246 0.4768 0.6253
+2023-07-24 11:42:26,034 - mmdet - INFO - Epoch [7][20/56]	lr: 7.915e-03, eta: 0:59:57, time: 6.986, data_time: 1.748, memory: 43755, loss_rpn_cls: 0.0147, loss_rpn_bbox: 0.0207, s0.loss_cls: 0.1571, s0.acc: 93.5303, s0.loss_bbox: 0.1177, s0.loss_mask: 0.4663, s1.loss_cls: 0.0802, s1.acc: 93.2421, s1.loss_bbox: 0.1508, s1.loss_mask: 0.2260, s2.loss_cls: 0.0418, s2.acc: 92.6234, s2.loss_bbox: 0.0918, s2.loss_mask: 0.1088, loss: 1.4759, grad_norm: 2.8753
+2023-07-24 11:44:14,106 - mmdet - INFO - Epoch [7][40/56]	lr: 7.694e-03, eta: 0:59:13, time: 5.404, data_time: 0.114, memory: 43755, loss_rpn_cls: 0.0132, loss_rpn_bbox: 0.0245, s0.loss_cls: 0.1581, s0.acc: 93.4001, s0.loss_bbox: 0.1221, s0.loss_mask: 0.4858, s1.loss_cls: 0.0794, s1.acc: 93.2373, s1.loss_bbox: 0.1565, s1.loss_mask: 0.2361, s2.loss_cls: 0.0424, s2.acc: 92.7340, s2.loss_bbox: 0.0944, s2.loss_mask: 0.1125, loss: 1.5249, grad_norm: 2.7787
+2023-07-24 11:46:41,711 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:46:42,666 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.385
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.732
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.354
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.324
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.465
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.572
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.486
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.627
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.718
+
+2023-07-24 11:46:42,674 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:46:42,675 - mmdet - INFO - Epoch(val) [7][29]	segm_mAP: 0.3851, segm_mAP_50: 0.7320, segm_mAP_75: 0.3536, segm_mAP_s: 0.3237, segm_mAP_m: 0.4647, segm_mAP_l: 0.5721, segm_mAP_copypaste: 0.3851 0.7320 0.3536 0.3237 0.4647 0.5721
+2023-07-24 11:48:51,821 - mmdet - INFO - Epoch [8][20/56]	lr: 7.277e-03, eta: 0:55:36, time: 6.456, data_time: 1.216, memory: 43755, loss_rpn_cls: 0.0167, loss_rpn_bbox: 0.0242, s0.loss_cls: 0.1532, s0.acc: 93.8607, s0.loss_bbox: 0.1251, s0.loss_mask: 0.4738, s1.loss_cls: 0.0782, s1.acc: 93.7427, s1.loss_bbox: 0.1634, s1.loss_mask: 0.2326, s2.loss_cls: 0.0413, s2.acc: 93.0258, s2.loss_bbox: 0.0994, s2.loss_mask: 0.1100, loss: 1.5179, grad_norm: 3.0550
+2023-07-24 11:50:39,102 - mmdet - INFO - Epoch [8][40/56]	lr: 7.036e-03, eta: 0:54:43, time: 5.365, data_time: 0.103, memory: 43755, loss_rpn_cls: 0.0159, loss_rpn_bbox: 0.0232, s0.loss_cls: 0.1578, s0.acc: 93.4684, s0.loss_bbox: 0.1233, s0.loss_mask: 0.4720, s1.loss_cls: 0.0821, s1.acc: 93.0109, s1.loss_bbox: 0.1559, s1.loss_mask: 0.2304, s2.loss_cls: 0.0429, s2.acc: 92.6051, s2.loss_bbox: 0.0947, s2.loss_mask: 0.1111, loss: 1.5092, grad_norm: 3.0323
+2023-07-24 11:53:06,538 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:53:07,472 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.389
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.731
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.362
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.307
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.482
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.582
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.549
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.493
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.619
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.671
+
+2023-07-24 11:53:07,480 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:53:07,480 - mmdet - INFO - Epoch(val) [8][29]	segm_mAP: 0.3891, segm_mAP_50: 0.7308, segm_mAP_75: 0.3616, segm_mAP_s: 0.3070, segm_mAP_m: 0.4823, segm_mAP_l: 0.5820, segm_mAP_copypaste: 0.3891 0.7308 0.3616 0.3070 0.4823 0.5820
+2023-07-24 11:55:16,851 - mmdet - INFO - Epoch [9][20/56]	lr: 6.588e-03, eta: 0:51:19, time: 6.468, data_time: 1.205, memory: 43755, loss_rpn_cls: 0.0133, loss_rpn_bbox: 0.0226, s0.loss_cls: 0.1519, s0.acc: 93.8574, s0.loss_bbox: 0.1107, s0.loss_mask: 0.4525, s1.loss_cls: 0.0780, s1.acc: 93.4353, s1.loss_bbox: 0.1442, s1.loss_mask: 0.2196, s2.loss_cls: 0.0411, s2.acc: 92.9878, s2.loss_bbox: 0.0895, s2.loss_mask: 0.1065, loss: 1.4299, grad_norm: 3.3947
+2023-07-24 11:57:03,684 - mmdet - INFO - Epoch [9][40/56]	lr: 6.333e-03, eta: 0:50:20, time: 5.342, data_time: 0.087, memory: 43755, loss_rpn_cls: 0.0121, loss_rpn_bbox: 0.0199, s0.loss_cls: 0.1510, s0.acc: 93.7565, s0.loss_bbox: 0.1231, s0.loss_mask: 0.4527, s1.loss_cls: 0.0731, s1.acc: 93.8052, s1.loss_bbox: 0.1601, s1.loss_mask: 0.2211, s2.loss_cls: 0.0398, s2.acc: 93.2957, s2.loss_bbox: 0.1061, s2.loss_mask: 0.1070, loss: 1.4659, grad_norm: 2.8651
+2023-07-24 11:59:31,773 - mmdet - INFO - Evaluating segm...
+2023-07-24 11:59:32,704 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.395
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.735
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.363
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.324
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.480
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.574
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.555
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.555
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.555
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.499
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.622
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.700
+
+2023-07-24 11:59:32,827 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_6.pth was removed
+2023-07-24 11:59:34,708 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_9.pth.
+2023-07-24 11:59:34,709 - mmdet - INFO - Best segm_mAP is 0.3945 at 9 epoch.
+2023-07-24 11:59:34,709 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 11:59:34,709 - mmdet - INFO - Epoch(val) [9][29]	segm_mAP: 0.3945, segm_mAP_50: 0.7351, segm_mAP_75: 0.3635, segm_mAP_s: 0.3240, segm_mAP_m: 0.4805, segm_mAP_l: 0.5741, segm_mAP_copypaste: 0.3945 0.7351 0.3635 0.3240 0.4805 0.5741
+2023-07-24 12:01:43,678 - mmdet - INFO - Epoch [10][20/56]	lr: 5.864e-03, eta: 0:47:06, time: 6.448, data_time: 1.205, memory: 43755, loss_rpn_cls: 0.0079, loss_rpn_bbox: 0.0191, s0.loss_cls: 0.1284, s0.acc: 94.8796, s0.loss_bbox: 0.0983, s0.loss_mask: 0.4392, s1.loss_cls: 0.0629, s1.acc: 94.9620, s1.loss_bbox: 0.1386, s1.loss_mask: 0.2166, s2.loss_cls: 0.0341, s2.acc: 94.3592, s2.loss_bbox: 0.0897, s2.loss_mask: 0.1055, loss: 1.3403, grad_norm: 3.0408
+2023-07-24 12:03:31,127 - mmdet - INFO - Epoch [10][40/56]	lr: 5.600e-03, eta: 0:46:03, time: 5.372, data_time: 0.127, memory: 43755, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0240, s0.loss_cls: 0.1600, s0.acc: 93.3529, s0.loss_bbox: 0.1268, s0.loss_mask: 0.4693, s1.loss_cls: 0.0794, s1.acc: 93.4475, s1.loss_bbox: 0.1586, s1.loss_mask: 0.2249, s2.loss_cls: 0.0418, s2.acc: 92.9397, s2.loss_bbox: 0.0988, s2.loss_mask: 0.1074, loss: 1.5025, grad_norm: 3.5790
+2023-07-24 12:05:59,105 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:06:00,051 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.405
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.749
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.373
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.326
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.494
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.625
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.562
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.562
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.562
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.501
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.636
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.700
+
+2023-07-24 12:06:00,174 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_9.pth was removed
+2023-07-24 12:06:02,039 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_10.pth.
+2023-07-24 12:06:02,039 - mmdet - INFO - Best segm_mAP is 0.4048 at 10 epoch.
+2023-07-24 12:06:02,039 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:06:02,039 - mmdet - INFO - Epoch(val) [10][29]	segm_mAP: 0.4048, segm_mAP_50: 0.7487, segm_mAP_75: 0.3728, segm_mAP_s: 0.3261, segm_mAP_m: 0.4940, segm_mAP_l: 0.6245, segm_mAP_copypaste: 0.4048 0.7487 0.3728 0.3261 0.4940 0.6245
+2023-07-24 12:08:10,864 - mmdet - INFO - Epoch [11][20/56]	lr: 5.120e-03, eta: 0:42:56, time: 6.441, data_time: 1.206, memory: 43755, loss_rpn_cls: 0.0144, loss_rpn_bbox: 0.0207, s0.loss_cls: 0.1414, s0.acc: 94.1943, s0.loss_bbox: 0.1115, s0.loss_mask: 0.4371, s1.loss_cls: 0.0709, s1.acc: 94.0166, s1.loss_bbox: 0.1441, s1.loss_mask: 0.2108, s2.loss_cls: 0.0365, s2.acc: 93.6780, s2.loss_bbox: 0.0935, s2.loss_mask: 0.1004, loss: 1.3814, grad_norm: 3.0577
+2023-07-24 12:09:57,813 - mmdet - INFO - Epoch [11][40/56]	lr: 4.853e-03, eta: 0:41:50, time: 5.347, data_time: 0.096, memory: 43755, loss_rpn_cls: 0.0133, loss_rpn_bbox: 0.0210, s0.loss_cls: 0.1453, s0.acc: 93.9925, s0.loss_bbox: 0.1116, s0.loss_mask: 0.4482, s1.loss_cls: 0.0716, s1.acc: 94.0610, s1.loss_bbox: 0.1467, s1.loss_mask: 0.2198, s2.loss_cls: 0.0373, s2.acc: 93.6864, s2.loss_bbox: 0.0991, s2.loss_mask: 0.1068, loss: 1.4208, grad_norm: 3.0891
+2023-07-24 12:12:25,741 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:12:26,686 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.401
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.740
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.375
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.325
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.488
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.614
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.503
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.628
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 12:12:26,694 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:12:26,695 - mmdet - INFO - Epoch(val) [11][29]	segm_mAP: 0.4006, segm_mAP_50: 0.7404, segm_mAP_75: 0.3753, segm_mAP_s: 0.3251, segm_mAP_m: 0.4876, segm_mAP_l: 0.6135, segm_mAP_copypaste: 0.4006 0.7404 0.3753 0.3251 0.4876 0.6135
+2023-07-24 12:14:36,833 - mmdet - INFO - Epoch [12][20/56]	lr: 4.374e-03, eta: 0:38:50, time: 6.506, data_time: 1.222, memory: 43755, loss_rpn_cls: 0.0133, loss_rpn_bbox: 0.0223, s0.loss_cls: 0.1392, s0.acc: 94.4320, s0.loss_bbox: 0.1131, s0.loss_mask: 0.4507, s1.loss_cls: 0.0701, s1.acc: 94.3826, s1.loss_bbox: 0.1538, s1.loss_mask: 0.2200, s2.loss_cls: 0.0392, s2.acc: 93.4182, s2.loss_bbox: 0.0992, s2.loss_mask: 0.1058, loss: 1.4268, grad_norm: 3.1286
+2023-07-24 12:16:23,657 - mmdet - INFO - Epoch [12][40/56]	lr: 4.110e-03, eta: 0:37:40, time: 5.341, data_time: 0.069, memory: 43755, loss_rpn_cls: 0.0103, loss_rpn_bbox: 0.0164, s0.loss_cls: 0.1306, s0.acc: 94.7884, s0.loss_bbox: 0.0974, s0.loss_mask: 0.4302, s1.loss_cls: 0.0628, s1.acc: 95.0003, s1.loss_bbox: 0.1301, s1.loss_mask: 0.2081, s2.loss_cls: 0.0336, s2.acc: 94.6465, s2.loss_bbox: 0.0879, s2.loss_mask: 0.1003, loss: 1.3076, grad_norm: 3.3916
+2023-07-24 12:18:52,283 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:18:53,336 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.398
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.749
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.371
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.324
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.485
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.557
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.551
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.495
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.620
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.665
+
+2023-07-24 12:18:53,344 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:18:53,344 - mmdet - INFO - Epoch(val) [12][29]	segm_mAP: 0.3979, segm_mAP_50: 0.7493, segm_mAP_75: 0.3713, segm_mAP_s: 0.3239, segm_mAP_m: 0.4852, segm_mAP_l: 0.5570, segm_mAP_copypaste: 0.3979 0.7493 0.3713 0.3239 0.4852 0.5570
+2023-07-24 12:21:27,568 - mmdet - INFO - Epoch [13][20/56]	lr: 3.642e-03, eta: 0:35:02, time: 7.711, data_time: 2.485, memory: 43755, loss_rpn_cls: 0.0131, loss_rpn_bbox: 0.0179, s0.loss_cls: 0.1193, s0.acc: 95.2604, s0.loss_bbox: 0.0937, s0.loss_mask: 0.4369, s1.loss_cls: 0.0592, s1.acc: 95.3880, s1.loss_bbox: 0.1303, s1.loss_mask: 0.2139, s2.loss_cls: 0.0318, s2.acc: 94.9050, s2.loss_bbox: 0.0867, s2.loss_mask: 0.1020, loss: 1.3047, grad_norm: 3.1386
+2023-07-24 12:23:14,566 - mmdet - INFO - Epoch [13][40/56]	lr: 3.386e-03, eta: 0:33:48, time: 5.350, data_time: 0.102, memory: 43755, loss_rpn_cls: 0.0095, loss_rpn_bbox: 0.0177, s0.loss_cls: 0.1382, s0.acc: 94.4580, s0.loss_bbox: 0.1062, s0.loss_mask: 0.4354, s1.loss_cls: 0.0685, s1.acc: 94.6063, s1.loss_bbox: 0.1369, s1.loss_mask: 0.2134, s2.loss_cls: 0.0363, s2.acc: 93.9148, s2.loss_bbox: 0.0930, s2.loss_mask: 0.1034, loss: 1.3585, grad_norm: 3.6367
+2023-07-24 12:25:42,704 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:25:43,695 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.401
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.740
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.370
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.322
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.487
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.620
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.555
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.555
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.555
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.496
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.624
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 12:25:43,702 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:25:43,702 - mmdet - INFO - Epoch(val) [13][29]	segm_mAP: 0.4007, segm_mAP_50: 0.7400, segm_mAP_75: 0.3697, segm_mAP_s: 0.3216, segm_mAP_m: 0.4873, segm_mAP_l: 0.6203, segm_mAP_copypaste: 0.4007 0.7400 0.3697 0.3216 0.4873 0.6203
+2023-07-24 12:27:53,687 - mmdet - INFO - Epoch [14][20/56]	lr: 2.940e-03, eta: 0:30:55, time: 6.498, data_time: 1.235, memory: 43755, loss_rpn_cls: 0.0125, loss_rpn_bbox: 0.0190, s0.loss_cls: 0.1351, s0.acc: 94.6647, s0.loss_bbox: 0.1018, s0.loss_mask: 0.4240, s1.loss_cls: 0.0679, s1.acc: 94.6698, s1.loss_bbox: 0.1344, s1.loss_mask: 0.2078, s2.loss_cls: 0.0358, s2.acc: 94.1609, s2.loss_bbox: 0.0927, s2.loss_mask: 0.1000, loss: 1.3309, grad_norm: 3.3140
+2023-07-24 12:29:40,254 - mmdet - INFO - Epoch [14][40/56]	lr: 2.699e-03, eta: 0:29:39, time: 5.328, data_time: 0.094, memory: 43756, loss_rpn_cls: 0.0092, loss_rpn_bbox: 0.0163, s0.loss_cls: 0.1272, s0.acc: 94.8747, s0.loss_bbox: 0.0987, s0.loss_mask: 0.4341, s1.loss_cls: 0.0619, s1.acc: 95.1145, s1.loss_bbox: 0.1368, s1.loss_mask: 0.2135, s2.loss_cls: 0.0333, s2.acc: 94.6736, s2.loss_bbox: 0.0926, s2.loss_mask: 0.1032, loss: 1.3268, grad_norm: 3.4143
+2023-07-24 12:32:08,589 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:32:09,650 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.401
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.743
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.366
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.327
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.488
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.620
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.558
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.558
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.558
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.497
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.632
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.712
+
+2023-07-24 12:32:09,659 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:32:09,659 - mmdet - INFO - Epoch(val) [14][29]	segm_mAP: 0.4012, segm_mAP_50: 0.7434, segm_mAP_75: 0.3656, segm_mAP_s: 0.3269, segm_mAP_m: 0.4876, segm_mAP_l: 0.6198, segm_mAP_copypaste: 0.4012 0.7434 0.3656 0.3269 0.4876 0.6198
+2023-07-24 12:34:19,193 - mmdet - INFO - Epoch [15][20/56]	lr: 2.284e-03, eta: 0:26:49, time: 6.476, data_time: 1.234, memory: 43756, loss_rpn_cls: 0.0103, loss_rpn_bbox: 0.0205, s0.loss_cls: 0.1374, s0.acc: 94.3831, s0.loss_bbox: 0.1069, s0.loss_mask: 0.4314, s1.loss_cls: 0.0686, s1.acc: 94.4034, s1.loss_bbox: 0.1386, s1.loss_mask: 0.2127, s2.loss_cls: 0.0360, s2.acc: 94.1649, s2.loss_bbox: 0.0906, s2.loss_mask: 0.1020, loss: 1.3550, grad_norm: 3.2255
+2023-07-24 12:36:06,136 - mmdet - INFO - Epoch [15][40/56]	lr: 2.063e-03, eta: 0:25:31, time: 5.346, data_time: 0.115, memory: 43756, loss_rpn_cls: 0.0081, loss_rpn_bbox: 0.0147, s0.loss_cls: 0.1138, s0.acc: 95.5273, s0.loss_bbox: 0.0842, s0.loss_mask: 0.4182, s1.loss_cls: 0.0553, s1.acc: 95.7292, s1.loss_bbox: 0.1174, s1.loss_mask: 0.2046, s2.loss_cls: 0.0309, s2.acc: 95.0013, s2.loss_bbox: 0.0810, s2.loss_mask: 0.0994, loss: 1.2278, grad_norm: 3.1577
+2023-07-24 12:38:34,605 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:38:35,651 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.406
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.747
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.385
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.333
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.488
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.619
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.562
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.562
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.562
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.504
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.630
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.718
+
+2023-07-24 12:38:35,774 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_10.pth was removed
+2023-07-24 12:38:37,649 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_15.pth.
+2023-07-24 12:38:37,650 - mmdet - INFO - Best segm_mAP is 0.4056 at 15 epoch.
+2023-07-24 12:38:37,650 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:38:37,650 - mmdet - INFO - Epoch(val) [15][29]	segm_mAP: 0.4056, segm_mAP_50: 0.7470, segm_mAP_75: 0.3849, segm_mAP_s: 0.3333, segm_mAP_m: 0.4885, segm_mAP_l: 0.6190, segm_mAP_copypaste: 0.4056 0.7470 0.3849 0.3333 0.4885 0.6190
+2023-07-24 12:40:46,405 - mmdet - INFO - Epoch [16][20/56]	lr: 1.688e-03, eta: 0:22:44, time: 6.437, data_time: 1.215, memory: 43756, loss_rpn_cls: 0.0080, loss_rpn_bbox: 0.0161, s0.loss_cls: 0.1171, s0.acc: 95.2165, s0.loss_bbox: 0.0879, s0.loss_mask: 0.4089, s1.loss_cls: 0.0583, s1.acc: 95.1804, s1.loss_bbox: 0.1227, s1.loss_mask: 0.2000, s2.loss_cls: 0.0312, s2.acc: 94.9005, s2.loss_bbox: 0.0863, s2.loss_mask: 0.0974, loss: 1.2338, grad_norm: 3.3410
+2023-07-24 12:42:33,365 - mmdet - INFO - Epoch [16][40/56]	lr: 1.493e-03, eta: 0:21:25, time: 5.348, data_time: 0.093, memory: 43756, loss_rpn_cls: 0.0112, loss_rpn_bbox: 0.0180, s0.loss_cls: 0.1263, s0.acc: 95.0065, s0.loss_bbox: 0.0960, s0.loss_mask: 0.4306, s1.loss_cls: 0.0624, s1.acc: 95.1111, s1.loss_bbox: 0.1288, s1.loss_mask: 0.2091, s2.loss_cls: 0.0331, s2.acc: 94.7439, s2.loss_bbox: 0.0882, s2.loss_mask: 0.1013, loss: 1.3049, grad_norm: 3.1573
+2023-07-24 12:45:01,836 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:45:02,714 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.409
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.751
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.392
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.329
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.496
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.656
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.560
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.499
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.631
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.729
+
+2023-07-24 12:45:02,836 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_15.pth was removed
+2023-07-24 12:45:04,703 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_16.pth.
+2023-07-24 12:45:04,703 - mmdet - INFO - Best segm_mAP is 0.4093 at 16 epoch.
+2023-07-24 12:45:04,703 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:45:04,703 - mmdet - INFO - Epoch(val) [16][29]	segm_mAP: 0.4093, segm_mAP_50: 0.7505, segm_mAP_75: 0.3923, segm_mAP_s: 0.3292, segm_mAP_m: 0.4957, segm_mAP_l: 0.6559, segm_mAP_copypaste: 0.4093 0.7505 0.3923 0.3292 0.4957 0.6559
+2023-07-24 12:47:13,321 - mmdet - INFO - Epoch [17][20/56]	lr: 1.167e-03, eta: 0:18:41, time: 6.430, data_time: 1.227, memory: 43756, loss_rpn_cls: 0.0095, loss_rpn_bbox: 0.0162, s0.loss_cls: 0.1242, s0.acc: 94.9626, s0.loss_bbox: 0.0963, s0.loss_mask: 0.4261, s1.loss_cls: 0.0624, s1.acc: 94.8902, s1.loss_bbox: 0.1316, s1.loss_mask: 0.2055, s2.loss_cls: 0.0336, s2.acc: 94.3842, s2.loss_bbox: 0.0885, s2.loss_mask: 0.0972, loss: 1.2911, grad_norm: 3.6603
+2023-07-24 12:48:59,966 - mmdet - INFO - Epoch [17][40/56]	lr: 1.001e-03, eta: 0:17:20, time: 5.332, data_time: 0.101, memory: 43756, loss_rpn_cls: 0.0100, loss_rpn_bbox: 0.0181, s0.loss_cls: 0.1232, s0.acc: 95.0407, s0.loss_bbox: 0.0929, s0.loss_mask: 0.3972, s1.loss_cls: 0.0618, s1.acc: 95.0134, s1.loss_bbox: 0.1278, s1.loss_mask: 0.1940, s2.loss_cls: 0.0330, s2.acc: 94.5006, s2.loss_bbox: 0.0893, s2.loss_mask: 0.0940, loss: 1.2413, grad_norm: 3.0632
+2023-07-24 12:51:28,495 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:51:29,400 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.411
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.752
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.391
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.336
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.494
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.649
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.503
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.635
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 12:51:29,523 - mmdet - INFO - The previous best checkpoint /home/nischay/hubmap/vitadap/detection/work_dirs/hubmap/pretwsiallhtc_resnext101_exp3_augv4_maskloss4/best_segm_mAP_epoch_16.pth was removed
+2023-07-24 12:51:31,385 - mmdet - INFO - Now best checkpoint is saved as best_segm_mAP_epoch_17.pth.
+2023-07-24 12:51:31,386 - mmdet - INFO - Best segm_mAP is 0.4109 at 17 epoch.
+2023-07-24 12:51:31,386 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:51:31,386 - mmdet - INFO - Epoch(val) [17][29]	segm_mAP: 0.4109, segm_mAP_50: 0.7523, segm_mAP_75: 0.3913, segm_mAP_s: 0.3356, segm_mAP_m: 0.4944, segm_mAP_l: 0.6494, segm_mAP_copypaste: 0.4109 0.7523 0.3913 0.3356 0.4944 0.6494
+2023-07-24 12:53:40,936 - mmdet - INFO - Epoch [18][20/56]	lr: 7.312e-04, eta: 0:14:38, time: 6.477, data_time: 1.208, memory: 43757, loss_rpn_cls: 0.0075, loss_rpn_bbox: 0.0166, s0.loss_cls: 0.1191, s0.acc: 95.1253, s0.loss_bbox: 0.0945, s0.loss_mask: 0.4144, s1.loss_cls: 0.0589, s1.acc: 95.3089, s1.loss_bbox: 0.1280, s1.loss_mask: 0.2043, s2.loss_cls: 0.0329, s2.acc: 94.5523, s2.loss_bbox: 0.0877, s2.loss_mask: 0.0988, loss: 1.2625, grad_norm: 3.0829
+2023-07-24 12:55:27,654 - mmdet - INFO - Epoch [18][40/56]	lr: 5.983e-04, eta: 0:13:16, time: 5.336, data_time: 0.097, memory: 43757, loss_rpn_cls: 0.0091, loss_rpn_bbox: 0.0171, s0.loss_cls: 0.1188, s0.acc: 95.3044, s0.loss_bbox: 0.0921, s0.loss_mask: 0.4194, s1.loss_cls: 0.0576, s1.acc: 95.5273, s1.loss_bbox: 0.1264, s1.loss_mask: 0.2059, s2.loss_cls: 0.0313, s2.acc: 94.9780, s2.loss_bbox: 0.0884, s2.loss_mask: 0.0993, loss: 1.2653, grad_norm: 3.1949
+2023-07-24 12:57:56,920 - mmdet - INFO - Evaluating segm...
+2023-07-24 12:57:57,812 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.409
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.749
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.395
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.334
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.493
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.637
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.566
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.507
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.635
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 12:57:57,820 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 12:57:57,820 - mmdet - INFO - Epoch(val) [18][29]	segm_mAP: 0.4091, segm_mAP_50: 0.7493, segm_mAP_75: 0.3948, segm_mAP_s: 0.3336, segm_mAP_m: 0.4928, segm_mAP_l: 0.6368, segm_mAP_copypaste: 0.4091 0.7493 0.3948 0.3336 0.4928 0.6368
+2023-07-24 13:00:06,922 - mmdet - INFO - Epoch [19][20/56]	lr: 3.909e-04, eta: 0:10:36, time: 6.454, data_time: 1.228, memory: 43757, loss_rpn_cls: 0.0108, loss_rpn_bbox: 0.0189, s0.loss_cls: 0.1316, s0.acc: 94.7054, s0.loss_bbox: 0.1012, s0.loss_mask: 0.4218, s1.loss_cls: 0.0642, s1.acc: 94.6910, s1.loss_bbox: 0.1323, s1.loss_mask: 0.2066, s2.loss_cls: 0.0343, s2.acc: 94.2238, s2.loss_bbox: 0.0895, s2.loss_mask: 0.1003, loss: 1.3113, grad_norm: 3.1590
+2023-07-24 13:01:53,357 - mmdet - INFO - Epoch [19][40/56]	lr: 2.940e-04, eta: 0:09:13, time: 5.322, data_time: 0.078, memory: 43757, loss_rpn_cls: 0.0093, loss_rpn_bbox: 0.0174, s0.loss_cls: 0.1208, s0.acc: 95.2555, s0.loss_bbox: 0.0919, s0.loss_mask: 0.4179, s1.loss_cls: 0.0567, s1.acc: 95.5718, s1.loss_bbox: 0.1269, s1.loss_mask: 0.2033, s2.loss_cls: 0.0313, s2.acc: 94.8581, s2.loss_bbox: 0.0877, s2.loss_mask: 0.0977, loss: 1.2609, grad_norm: 3.1573
+2023-07-24 13:04:21,351 - mmdet - INFO - Evaluating segm...
+2023-07-24 13:04:22,253 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.409
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.748
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.391
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.333
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.493
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.627
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.567
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.567
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.567
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.509
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.635
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.718
+
+2023-07-24 13:04:22,261 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 13:04:22,261 - mmdet - INFO - Epoch(val) [19][29]	segm_mAP: 0.4085, segm_mAP_50: 0.7477, segm_mAP_75: 0.3908, segm_mAP_s: 0.3328, segm_mAP_m: 0.4928, segm_mAP_l: 0.6274, segm_mAP_copypaste: 0.4085 0.7477 0.3908 0.3328 0.4928 0.6274
+2023-07-24 13:06:32,430 - mmdet - INFO - Epoch [20][20/56]	lr: 1.535e-04, eta: 0:06:35, time: 6.508, data_time: 1.224, memory: 43757, loss_rpn_cls: 0.0088, loss_rpn_bbox: 0.0189, s0.loss_cls: 0.1206, s0.acc: 95.0391, s0.loss_bbox: 0.0935, s0.loss_mask: 0.4161, s1.loss_cls: 0.0596, s1.acc: 95.1982, s1.loss_bbox: 0.1293, s1.loss_mask: 0.2023, s2.loss_cls: 0.0331, s2.acc: 94.2727, s2.loss_bbox: 0.0909, s2.loss_mask: 0.0978, loss: 1.2710, grad_norm: 3.2949
+2023-07-24 13:08:18,389 - mmdet - INFO - Epoch [20][40/56]	lr: 9.478e-05, eta: 0:05:10, time: 5.298, data_time: 0.081, memory: 43757, loss_rpn_cls: 0.0091, loss_rpn_bbox: 0.0161, s0.loss_cls: 0.1049, s0.acc: 95.8757, s0.loss_bbox: 0.0838, s0.loss_mask: 0.3944, s1.loss_cls: 0.0520, s1.acc: 95.8662, s1.loss_bbox: 0.1164, s1.loss_mask: 0.1942, s2.loss_cls: 0.0297, s2.acc: 95.2309, s2.loss_bbox: 0.0826, s2.loss_mask: 0.0939, loss: 1.1772, grad_norm: 3.2273
+2023-07-24 13:10:46,991 - mmdet - INFO - Evaluating segm...
+2023-07-24 13:10:47,883 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.409
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.749
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.393
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.334
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.492
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.638
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.564
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.505
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.634
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 13:10:47,890 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 13:10:47,891 - mmdet - INFO - Epoch(val) [20][29]	segm_mAP: 0.4085, segm_mAP_50: 0.7486, segm_mAP_75: 0.3933, segm_mAP_s: 0.3337, segm_mAP_m: 0.4923, segm_mAP_l: 0.6381, segm_mAP_copypaste: 0.4085 0.7486 0.3933 0.3337 0.4923 0.6381
+2023-07-24 13:12:58,386 - mmdet - INFO - Epoch [21][20/56]	lr: 2.441e-05, eta: 0:02:34, time: 6.524, data_time: 1.217, memory: 43757, loss_rpn_cls: 0.0134, loss_rpn_bbox: 0.0207, s0.loss_cls: 0.1250, s0.acc: 95.1758, s0.loss_bbox: 0.0934, s0.loss_mask: 0.4311, s1.loss_cls: 0.0581, s1.acc: 95.6224, s1.loss_bbox: 0.1298, s1.loss_mask: 0.2109, s2.loss_cls: 0.0323, s2.acc: 94.8125, s2.loss_bbox: 0.0920, s2.loss_mask: 0.1033, loss: 1.3099, grad_norm: 3.1183
+2023-07-24 13:14:44,923 - mmdet - INFO - Epoch [21][40/56]	lr: 5.165e-06, eta: 0:01:08, time: 5.327, data_time: 0.074, memory: 43757, loss_rpn_cls: 0.0083, loss_rpn_bbox: 0.0156, s0.loss_cls: 0.1255, s0.acc: 95.0147, s0.loss_bbox: 0.0953, s0.loss_mask: 0.4133, s1.loss_cls: 0.0599, s1.acc: 95.2306, s1.loss_bbox: 0.1299, s1.loss_mask: 0.2014, s2.loss_cls: 0.0324, s2.acc: 94.7427, s2.loss_bbox: 0.0896, s2.loss_mask: 0.0973, loss: 1.2685, grad_norm: 3.3860
+2023-07-24 13:16:09,659 - mmdet - INFO - Saving checkpoint at 21 epochs
+2023-07-24 13:17:13,939 - mmdet - INFO - Evaluating segm...
+2023-07-24 13:17:14,945 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.408
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.750
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.391
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.333
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.492
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.639
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.563
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.504
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.633
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.724
+
+2023-07-24 13:17:14,952 - mmdet - INFO - Exp name: detec101next.py
+2023-07-24 13:17:14,952 - mmdet - INFO - Epoch(val) [21][29]	segm_mAP: 0.4083, segm_mAP_50: 0.7502, segm_mAP_75: 0.3914, segm_mAP_s: 0.3325, segm_mAP_m: 0.4925, segm_mAP_l: 0.6389, segm_mAP_copypaste: 0.4083 0.7502 0.3914 0.3325 0.4925 0.6389
