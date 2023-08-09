@@ -147,5 +147,282 @@ Once No pseudo Resnext 101, CbnetV2 Base and Vit adapter Beit v2l models are tra
 Once all the models are trained, you may use them for inference. The names of config files used in the Stage 2 are same as the dataset name hosted on Kaggle for performing final submission.
 
 
+## Overview
+
+**Winning solution consists of :**
+
+**5** MMdet based models with different architectures.
+**2x ViT-Adapter-L** (https://github.com/czczup/ViT-Adapter/tree/main/detection)
+**1x CBNetV2 Base** (https://github.com/VDIGPKU/CBNetV2)
+**1x Detectors ResNeXt-101-32x4d** (https://github.com/joe-siyuan-qiao/DetectoRS)
+**1x Detectors Resnet 50** 
+
+I also had few Vit Adapter based single models which could have placed me on 1st/2nd ranks but I didn't select. No regrets :))
+
+## Image Data Used
+
+I only used competition for training models. *No external image data was used.* 
+
+## How to use dataset 2??
+
+Making the best use of dataset 2 was one of the key things to figure out in the competition. For me multi stage approach turned to be giving the highest boost. Basically during stage 1, A coco pretrained model will be loaded and pretrained on all the WSIs present in noisy annotations (dataset 2) for less epochs (~10), using really high learning rate (0.02+), with a cosine scheduler with minimum lr around (0.01), light augmentations.  
+
+In stage 2, we will load the pretained model from stage 1 and fine-tune it on dataset 1 with higher number of epochs (15-25), heavy augmentations, higher image resolution (for some models), slightly lower starting learning rate and minimum LR till 1e-7. 
+
+
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4712534%2Fdfbae6a6f634c755d9ea39ca2daa9751%2FScreenshot%202023-08-09%20at%203.36.59%20AM.png?generation=1691532480119818&alt=media)
+
+*I have used Pseudo labels using dataset 3 in training few models of final ensemble solution, although I didn't find any boost using them in the leaderboard scores, I will still talk about it as they were used in final solution*
+
+
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4712534%2Facf9ee081989a328c9f150458b4fce95%2FScreenshot%202023-08-09%20at%204.01.34%20AM.png?generation=1691533922010932&alt=media)
+
+
+Using multistage approach gave around consistent 2-3% boost on validation and 4-6% improvement in leaderboard scores which is quite huge. The gap between cv & lb scores was quite obvious as models were now learning on WSI 3 & 4. Also, I never had to worry about using dilation or not as my later stage was just fine-tuned on dataset 1 (noise free annotations), so dilation doesn't help if applied directly on the masks.
+
+# Models Summary
+
+## Vit Adapter: These models were published in recent ICLR 2023 & turned out to be highest scoring architectures. 
+- Pretrained coco weights were used. 
+- 1400 x 1400 Image size (dataset fold-1 with pseudo threshold 0.5) & (full data dataset 1 with pseudo threshold 0.6)
+- Loss fnc: Mask Head loss multiplied by 2x in decoder.
+- 1200 x 1200 Image size used in stage 1.
+- Cosine Scheduler with warmup were used.
+- SGD optimizer for fold 1 model & AdamW for full data model
+- Higher Image Size + Multi Scale Inference (1600x1600, 1400x1400)
+
+**Best Public Leaderboard single model: 0.600**
+**Best Private Leaderboard single model: 0.589**
+
+
+##CBNetV2: Another popular set of architectures based on Swin transformers. 
+- Pretrained coco weights were used. 
+- 1600 x 1600 Image size (dataset 1 fold-5 without Pseudo)
+- 1400 x 1400 Image size used in stage 1.
+- Cosine Scheduler with warmup were used.
+- Higher Image Size during Inference (2048x2048)
+- SGD optimizer 
+
+**Best Public Leaderboard single model: 0.567**
+
+## Detectors HTC based models:  CNN based encoders for more diversity
+- Pretrained coco weights were used. 
+- 2048 x 2048 image size (Resnet50 fold 1 w/ pseudo threshold 0.5 , Resnext101d without pseudo)
+- Loss fnc: Mask Head loss 4x for Resnext101, 1x for Resnet50 
+- Cosine Scheduler with warmup were used.
+- SGD optimizer 
+
+**Public Leaderboard single model: 0.573 ( resnext 101) , 0.558 (resnet50)**
+
+
+##**Techniques which provided consistent boost:**
+
+  1. Multi Stage Training
+  2. Flip based Test Time Augmentation
+  3. Higher weights to Mask head in HTC based models
+  4. SGD optimizer 
+  5. Weighted Box Fusion for Ensemble
+  6. Post Processing
+
+
+## Post Processing & Ensemble
+
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4712534%2F0fb5299755c5bfa0d6da43263a8be223%2FScreenshot%202023-08-09%20at%204.38.49%20AM.png?generation=1691536182102653&alt=media)
+
+As mentioned earlier, I used WBF to do ensemble. To increase the diversity, I kept NMS for TTA and WBF for ensemble. Also, using both CNN / Transformer based encoders helped in increasing higher diversity and hence more impactful ensemble. 
+
+![](https://www.googleapis.com/download/storage/v1/b/kaggle-forum-message-attachments/o/inbox%2F4712534%2F764ea7995470a76b07549107c4b531a2%2FScreenshot%202023-08-09%20at%204.26.47%20AM.png?generation=1691536206638981&alt=media)
+
+After the ensemble, I think some of my mask predictions got a little distorted. Therefore, I applied erosion followed by single iteration of dilation. This Post-processing gave me a decent amount of boost in both cross validation score as well as on leaderboard (+ 0.005)
+ 
+
+##Light Augmentations
+
+```
+dict(
+    type='RandomFlip',
+    direction=['horizontal', 'vertical'],
+    flip_ratio=0.5),
+dict(
+    type='AutoAugment',
+    policies=[[{
+        'type': 'Shear',
+        'prob': 0.4,
+        'level': 0
+    }], [{
+        'type': 'Translate',
+        'prob': 0.4,
+        'level': 5
+    }],
+              [{
+                  'type': 'ColorTransform',
+                  'prob': 1.0,
+                  'level': 6
+              }, {
+                  'type': 'EqualizeTransform'
+              }]]),
+dict(
+    type='Albu',
+    transforms=[
+        dict(
+            type='ShiftScaleRotate',
+            shift_limit=0.0625,
+            scale_limit=0.15,
+            rotate_limit=15,
+            p=0.4)
+    ],
+    bbox_params=dict(
+        type='BboxParams',
+        format='pascal_voc',
+        label_fields=['gt_labels'],
+        min_visibility=0.0,
+        filter_lost_elements=True)
+```
+
+
+## Heavy Augmentations
+
+```
+dict(
+                type='RandomFlip',
+                direction=['horizontal', 'vertical'],
+                flip_ratio=0.5),
+            dict(
+                type='AutoAugment',
+                policies=[[{
+                    'type': 'Shear',
+                    'prob': 0.4,
+                    'level': 0
+                }], [{
+                    'type': 'Translate',
+                    'prob': 0.4,
+                    'level': 5
+                }],
+                          [{
+                              'type': 'ColorTransform',
+                              'prob': 0.6,
+                              'level': 10
+                          }, {
+                              'type': 'BrightnessTransform',
+                              'prob': 0.6,
+                              'level': 3
+                          }],
+                          [{
+                              'type': 'ColorTransform',
+                              'prob': 0.6,
+                              'level': 10
+                          }, {
+                              'type': 'ContrastTransform',
+                              'prob': 0.6,
+                              'level': 5
+                          }],
+                          [{
+                              'type': 'PhotoMetricDistortion',
+                              'brightness_delta': 32,
+                              'contrast_range': (0.5, 1.5),
+                              'hue_delta': 15
+                          }],
+                          [{
+                              'type': 'MinIoURandomCrop',
+                              'min_ious': (0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                              'min_crop_size': 0.2
+                          }],
+                          [{
+                              'type':
+                              'CutOut',
+                              'n_holes': (3, 8),
+                              'cutout_shape': [(4, 4), (4, 8), (8, 4), (8, 8),
+                                               (16, 32), (32, 16), (32, 32),
+                                               (32, 48), (48, 32), (48, 48)]
+                          }],
+                          [{
+                              'type': 'EqualizeTransform',
+                              'prob': 0.6
+                          }, {
+                              'type': 'BrightnessTransform',
+                              'prob': 0.6,
+                              'level': 3
+                          }],
+                          [{
+                              'type': 'PhotoMetricDistortion',
+                              'brightness_delta': 32,
+                              'contrast_range': (0.5, 1.5),
+                              'hue_delta': 18
+                          }],
+                          [{
+                              'type': 'MinIoURandomCrop',
+                              'min_ious': (0.4, 0.5, 0.6, 0.7, 0.8, 0.9),
+                              'min_crop_size': 0.3
+                          }],
+                          [{
+                              'type':
+                              'CutOut',
+                              'n_holes': (5, 10),
+                              'cutout_shape': [(4, 4), (4, 8), (8, 4), (8, 8),
+                                               (16, 32), (32, 16), (32, 32),
+                                               (32, 48), (48, 32), (48, 48)]
+                          }],
+                          [{
+                              'type': 'BrightnessTransform',
+                              'prob': 0.6,
+                              'level': 4
+                          }, {
+                              'type': 'ContrastTransform',
+                              'prob': 0.6,
+                              'level': 6
+                          }, {
+                              'type': 'Rotate',
+                              'prob': 0.6,
+                              'level': 10
+                          }],
+                          [{
+                              'type': 'ColorTransform',
+                              'prob': 1.0,
+                              'level': 6
+                          }, {
+                              'type': 'EqualizeTransform'
+                          }]]),
+            dict(
+                type='Albu',
+                transforms=[
+                    dict(
+                        type='ShiftScaleRotate',
+                        shift_limit=0.0625,
+                        scale_limit=0.15,
+                        rotate_limit=15,
+                        p=0.5),
+                    dict(type='RandomRotate90', p=0.5),
+                    dict(
+                        type='OneOf',
+                        transforms=[
+                            dict(
+                                type='ElasticTransform',
+                                alpha=120,
+                                sigma=6.0,
+                                alpha_affine=3.5999999999999996,
+                                p=1),
+                            dict(type='GridDistortion', p=1),
+                            dict(
+                                type='OpticalDistortion',
+                                distort_limit=2,
+                                shift_limit=0.5,
+                                p=1)
+                        ],
+                        p=0.3)
+                ],
+                bbox_params=dict(
+                    type='BboxParams',
+                    format='pascal_voc',
+                    label_fields=['gt_labels'],
+                    min_visibility=0.0,
+                    filter_lost_elements=True) 
+```
+
+
+Thank you all, I've tried my best to cover most part of my solution. Again, I am super happy to win the solo gold, feel free to reach out in case you find difficulty understanding any part of it.
+
+
+
+
 
 
