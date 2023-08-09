@@ -326,8 +326,8 @@ data = dict(
     train=dict(
         type='CocoDataset',
         classes=('blood_vessels', ),
-        ann_file='/home/nischay/hubmap/coco/ds2_coco_1024_train_fold1.json',
-        img_prefix='/home/nischay/hubmap/Data/train/',
+        ann_file='coco_data/coco/ds2_coco_1024_train_fold1.json',
+        img_prefix='train/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
@@ -387,8 +387,8 @@ data = dict(
     val=dict(
         type='CocoDataset',
         classes=('blood_vessels', ),
-        ann_file='/home/nischay/hubmap/coco/ds1_coco_1024_valid_all_fold1.json',
-        img_prefix='/home/nischay/hubmap/Data/train/',
+        ann_file='coco_data/coco/ds1_coco_1024_valid_all_fold1.json',
+        img_prefix='train/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -412,9 +412,8 @@ data = dict(
     test=dict(
         type='CocoDataset',
         classes=('blood_vessels', ),
-        ann_file=
-        '/home/nischay/hubmap/coco/ds12_coco_1024_valid_all_fold1.json',
-        img_prefix='/home/nischay/hubmap/Data/train/',
+        ann_file='coco_data/coco/ds1_coco_1024_valid_all_fold1.json',
+        img_prefix='train/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -453,7 +452,7 @@ gpu_ids = range(0, 3)
 seed = 69
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-load_from = '/home/nischay/hubmap/try_mm/cbnet_pret/htc_cbv2_swin_base22k_patch4_window7_mstrain_400-1400_giou_4conv1f_adamw_20e_coco.pth'
+load_from = './htc_cbv2_swin_base22k_patch4_window7_mstrain_400-1400_giou_4conv1f_adamw_20e_coco.pth'
 work_dir = './work_dirs/hubmap/pretexp1_cbnetbase_1600_10e'
 workflow = [('train', 1)]
 auto_resume = False
