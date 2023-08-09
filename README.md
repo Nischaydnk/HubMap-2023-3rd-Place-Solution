@@ -96,6 +96,21 @@ Once all the datasets are downloaded and unzipped. You can training each of the 
 - Change path parameter in dist_train.sh to `all_configs/nops_config_finetune/exp1_withpret_cbbase_1600_morepretep.py`
 - `bash dist_train.sh`
 
+
+### Generate Pseudo Labels on dataset 3
+
+#### Vit Adapter Beit v2l htc++ w/ SGD
+
+- Change path parameter in dist_train.sh to `all_configs/pseudo_config_pret/pretexp3_adaplargebeitv2l_htc.py`
+- `bash dist_train.sh`
+- Select path of best saved epoch from work_dir folder selected in stage 1 config.
+- Change load_from parameter in `all_configs/pseudo_config_finetune/pretexp4_adapbeitv2lhtc_1400_ds2wsiall_ps60exp2_lossw2_adamp2_leak.py`
+- Change path parameter in dist_train.sh to `all_configs/pseudo_config_finetune/pretexp4_adapbeitv2lhtc_1400_ds2wsiall_ps60exp2_lossw2_adamp2_leak.py`
+- `bash dist_train.sh`
+
+
+Once No pseudo Resnext 101, CbnetV2 Base and Vit adapter Beit v2l models are multistage finetuned, use those weights to perform inference in `split/pseudogen.ipynb' for generating pseudo labels. You may save the pseudo labels in whatever path you want, but will need to change the data path in config files accordingly. 
+
   
 ### Pseudo label models:
 
