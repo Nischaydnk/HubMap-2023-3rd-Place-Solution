@@ -146,3 +146,6 @@ Once No pseudo Resnext 101, CbnetV2 Base and Vit adapter Beit v2l models are tra
 
 Once all the models are trained, you may use them for inference. The names of config files used in the Stage 2 are same as the dataset name hosted on Kaggle for performing final submission.
 
+
+
+
