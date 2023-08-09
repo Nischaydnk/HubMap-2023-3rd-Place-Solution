@@ -99,7 +99,7 @@ Once all the datasets are downloaded and unzipped. You can training each of the 
 
 ### Generate Pseudo Labels on dataset 3
 
-#### Vit Adapter Beit v2l htc++ w/ SGD
+#### Vit Adapter Beit v2l htc++ w/ SGD (no pseudo)
 
 - Change path parameter in dist_train.sh to `all_configs/pseudo_config_pret/pretexp3_adaplargebeitv2l_htc.py`
 - `bash dist_train.sh`
@@ -109,7 +109,7 @@ Once all the datasets are downloaded and unzipped. You can training each of the 
 - `bash dist_train.sh`
 
 
-Once No pseudo Resnext 101, CbnetV2 Base and Vit adapter Beit v2l models are multistage finetuned, use those weights to perform inference in `split/pseudogen.ipynb' for generating pseudo labels. You may save the pseudo labels in whatever path you want, but will need to change the data path in config files accordingly. 
+Once No pseudo Resnext 101, CbnetV2 Base and Vit adapter Beit v2l models are trained on multistage pipeline, use those weights to perform inference in `split/pseudogen.ipynb' for generating pseudo labels. You may save the pseudo labels in whatever path you want, but will need to change the data path in config files accordingly. 
 
   
 ### Pseudo label models:
@@ -143,4 +143,6 @@ Once No pseudo Resnext 101, CbnetV2 Base and Vit adapter Beit v2l models are mul
 - Change path parameter in dist_train.sh to `all_configs/pseudo_config_finetune/ds1pretexp1moreaug-htc50-2048-cv408ps.py`
 - `bash dist_train.sh`
 
+
+Once all the models are trained, you may use them for inference. The names of config files used in the Stage 2 are same as the dataset name hosted on Kaggle for performing final submission.
 
