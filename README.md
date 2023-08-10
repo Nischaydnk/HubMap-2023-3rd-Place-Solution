@@ -101,11 +101,11 @@ Once all the datasets are downloaded and unzipped. You can training each of the 
 
 #### Vit Adapter Beit v2l htc++ w/ SGD (no pseudo)
 
-- Change path parameter in dist_train.sh to `all_configs/pseudo_config_pret/pretexp3_adaplargebeitv2l_htc.py`
+- Change path parameter in dist_train.sh to `all_configs/pretconf/pretexp1_adaplargebeitv2l_htc-Copy1.py`
 - `bash dist_train.sh`
 - Select path of best saved epoch from work_dir folder selected in stage 1 config.
-- Change load_from parameter in `all_configs/pseudo_config_finetune/pretexp4_adapbeitv2lhtc_1400_ds2wsiall_ps60exp2_lossw2_adamp2_leak.py`
-- Change path parameter in dist_train.sh to `all_configs/pseudo_config_finetune/pretexp4_adapbeitv2lhtc_1400_ds2wsiall_ps60exp2_lossw2_adamp2_leak.py`
+- Change load_from parameter in `all_configs/nops_config_finetune/exp4_adapbeitv2l.py`
+- Change path parameter in dist_train.sh to `all_configs/nops_config_finetune/exp4_adapbeitv2l.py`
 - `bash dist_train.sh`
 
 
