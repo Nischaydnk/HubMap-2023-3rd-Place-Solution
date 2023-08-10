@@ -329,8 +329,8 @@ data = dict(
         type='CocoDataset',
         classes=('blood_vessels', ),
         ann_file=
-        '/home/nischay/hubmap/pseudo/60_combined_ds2wsiall_exp1pseudo.json',
-        img_prefix='/home/nischay/hubmap/Data/train/',
+        'coco_data/pseudo_coco/60_combined_ds2wsiall_exp1pseudo.json',
+        img_prefix='train/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
@@ -395,8 +395,8 @@ data = dict(
     val=dict(
         type='CocoDataset',
         classes=('blood_vessels', ),
-        ann_file='/home/nischay/hubmap/coco/ds12_coco_1024_valid_fold1.json',
-        img_prefix='/home/nischay/hubmap/Data/train/',
+        ann_file='coco_data/coco/ds12_coco_1024_valid_fold1.json',
+        img_prefix='train/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
@@ -420,8 +420,8 @@ data = dict(
     test=dict(
         type='CocoDataset',
         classes=('blood_vessels', ),
-        ann_file='/home/nischay/hubmap/coco/ds12_coco_1024_valid_fold1.json',
-        img_prefix='/home/nischay/hubmap/Data/train/',
+        ann_file='coco_data/coco/ds12_coco_1024_valid_fold1.json',
+        img_prefix='train/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
